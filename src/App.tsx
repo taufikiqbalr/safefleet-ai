@@ -5,11 +5,14 @@ import { ProtectedRoute, RequireRoles } from './auth/RouteGuards';
 import { AppShell } from './components/AppShell';
 import { AlertCenterPage } from './pages/AlertCenterPage';
 import { AlertDetailPage } from './pages/AlertDetailPage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ForbiddenPage } from './pages/ForbiddenPage';
 import { LiveFleetPage } from './pages/LiveFleetPage';
 import { LoginPage } from './pages/LoginPage';
+import { SafetyEventDetailPage } from './pages/SafetyEventDetailPage';
+import { SafetyEventsPage } from './pages/SafetyEventsPage';
 
 export function App() {
   return (
@@ -23,8 +26,9 @@ export function App() {
           <Route path="live-fleet" element={<LiveFleetPage />} />
           <Route path="alerts" element={<AlertCenterPage />} />
           <Route path="alerts/:alertId" element={<AlertDetailPage />} />
-          <Route path="safety-events" element={<ComingSoonPage phase="W4" title="Safety Events" />} />
-          <Route path="analytics" element={<ComingSoonPage phase="W4" title="Analytics" />} />
+          <Route path="safety-events" element={<SafetyEventsPage />} />
+          <Route path="safety-events/:eventId" element={<SafetyEventDetailPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="forbidden" element={<ForbiddenPage />} />
 
           <Route element={<RequireRoles roles={SUPERVISOR_MANAGEMENT_ROLES} />}>
