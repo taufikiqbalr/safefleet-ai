@@ -17,10 +17,10 @@ W2 Live Fleet Dashboard               ✅
 W3 Realtime Alert Center              ✅
    |
    v
-W4 Safety History & Analytics         NEXT
+W4 Safety History & Analytics         ✅
    |
    v
-W5 Fleet Administration & Risk Policy
+W5 Fleet Administration & Risk Policy NEXT
    |
    v
 W6 Validation & Release Hardening
@@ -30,9 +30,9 @@ Each phase has its own detailed contract under `docs/`. A phase is complete only
 
 ## MVP boundary
 
-For the current SafeFleet hackathon/research MVP, W0 through W4 are the primary operator experience. W5 is needed when the web app must administer fleet entities and risk policy directly. W6 is the release-hardening boundary.
+For the current SafeFleet hackathon/research MVP, W0 through W4 are now implemented as the primary operator experience. W5 is needed when the web app must administer fleet entities, device provisioning, assignments/trips, users and risk policy directly. W6 is the release-hardening boundary.
 
-After W3 the web console can authenticate an operator, monitor active fleet state and execute the backend alert lifecycle. W4 adds the historical/research analysis surface required to evaluate safety-event quality, feedback, trends and latency.
+After W4 the web console can authenticate an operator, monitor active fleet state, execute the backend alert lifecycle, investigate historical safety events, review drowsiness evidence, submit human feedback and inspect backend analytics/latency without inventing unsupported model or safety interpretations.
 
 ## Cross-repository boundaries
 
