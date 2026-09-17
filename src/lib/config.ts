@@ -10,5 +10,5 @@ export const appConfig = Object.freeze({
   apiBaseUrl: normalizeApiBaseUrl(
     import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1',
   ),
-  webVersion: '0.1.0',
+  webVersion: '0.2.0',
 });
