@@ -18,7 +18,9 @@ export function AppShell() {
   const navigation = navigationForRole(session.user.role);
   const pageTitle = location.pathname.startsWith('/alerts/')
     ? 'Alert Detail'
-    : pageNames.get(location.pathname) ?? (location.pathname === '/forbidden' ? 'Access restricted' : 'SafeFleet AI');
+    : location.pathname.startsWith('/safety-events/')
+      ? 'Safety Event Detail'
+      : pageNames.get(location.pathname) ?? (location.pathname === '/forbidden' ? 'Access restricted' : 'SafeFleet AI');
 
   return (
     <div className="app-frame">
@@ -33,7 +35,7 @@ export function AppShell() {
       <div className="page-frame">
         <header className="topbar">
           <div className="topbar-title"><button type="button" className="menu-button" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen((value) => !value)}>☰</button><div><span className="eyebrow">SafeFleet Operations</span><h1>{pageTitle}</h1></div></div>
-          <div className="topbar-actions"><span className="environment-badge">W3 · {session.user.role}</span><div className="operator-identity"><div><strong>{session.user.fullName}</strong><span>{session.organization.name}</span></div><div className="operator-avatar" aria-label={`Signed in as ${session.user.fullName}`}>{initials(session.user.fullName)}</div></div></div>
+          <div className="topbar-actions"><span className="environment-badge">W4 · {session.user.role}</span><div className="operator-identity"><div><strong>{session.user.fullName}</strong><span>{session.organization.name}</span></div><div className="operator-avatar" aria-label={`Signed in as ${session.user.fullName}`}>{initials(session.user.fullName)}</div></div></div>
         </header>
         <main className="page-content"><Outlet /></main>
       </div>
