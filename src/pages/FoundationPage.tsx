@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { useAuth } from '../auth/AuthContext';
 import { checkBackendHealth, type BackendHealth } from '../lib/api';
 import { appConfig } from '../lib/config';
 
@@ -11,8 +12,8 @@ const initialHealth: BackendHealth = {
 
 const roadmap = [
   ['W0', 'Foundation', 'Application shell, navigation, environment configuration, diagnostics, CI.', 'complete'],
-  ['W1', 'Auth & tenant session', 'Organization login, JWT bootstrap, protected routes, RBAC-aware navigation.', 'next'],
-  ['W2', 'Live fleet dashboard', 'Fleet summary, live vehicle state, GPS map, active trips, operational status.', 'planned'],
+  ['W1', 'Auth & tenant session', 'Organization login, JWT bootstrap, protected routes, RBAC-aware navigation.', 'complete'],
+  ['W2', 'Live fleet dashboard', 'Fleet summary, live vehicle state, GPS map, active trips, operational status.', 'next'],
   ['W3', 'Realtime alert center', 'Socket.IO updates, alert queue, assignment, acknowledgement and resolution.', 'planned'],
   ['W4', 'History & analytics', 'Safety history, drowsiness detail, feedback, trends, models and latency.', 'planned'],
   ['W5', 'Administration', 'Drivers, vehicles, devices, assignments, provisioning and risk policy.', 'planned'],
@@ -20,6 +21,8 @@ const roadmap = [
 ] as const;
 
 export function FoundationPage() {
+  const auth = useAuth();
+  const session = auth.session!;
   const [health, setHealth] = useState<BackendHealth>(initialHealth);
 
   const refreshHealth = useCallback(async (signal?: AbortSignal) => {
@@ -37,6 +40,10 @@ export function FoundationPage() {
   const checkedAt = health.checkedAt
     ? new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(health.checkedAt)
     : 'Not checked yet';
+  const expiresAt = new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(session.expiresAt));
 
   return (
     <div className="content-stack">
@@ -44,12 +51,11 @@ export function FoundationPage() {
         <div className="hero-copy">
           <div className="hero-kicker">
             <span className="status-pulse" />
-            Phase W0 · Web Foundation
+            Phase W1 · Authenticated Operations
           </div>
-          <h2>Fleet safety operations, built around the backend contract.</h2>
+          <h2>{session.organization.name} is connected to the SafeFleet operator console.</h2>
           <p>
-            The foundation intentionally shows no invented fleet telemetry. Live drivers, risk, alerts,
-            maps and analytics are connected phase-by-phase to SafeFleet Backend.
+            Your browser session has been verified against SafeFleet Backend. Tenant identity and role come from the authenticated backend context; later phases now have a secure boundary for live fleet data.
           </p>
           <div className="hero-actions">
             <button type="button" className="button button--primary" onClick={() => void refreshHealth()}>
@@ -70,19 +76,40 @@ export function FoundationPage() {
         </div>
       </section>
 
-      <section className="metric-grid" aria-label="Foundation status">
+      <section className="metric-grid" aria-label="Web status">
         <StatusMetric
           label="Backend API"
           value={health.status === 'reachable' ? 'Reachable' : health.status === 'unreachable' ? 'Unavailable' : 'Checking'}
           detail={health.detail}
           tone={health.status}
         />
-        <StatusMetric label="Web shell" value="Ready" detail="React, TypeScript, Vite, responsive layout" tone="reachable" />
-        <StatusMetric label="Authentication" value="W1" detail="JWT session and role-aware routes are next" tone="neutral" />
-        <StatusMetric label="Realtime" value="W3" detail="Socket.IO integration stays isolated from foundation" tone="neutral" />
+        <StatusMetric label="Authentication" value="Verified" detail="JWT user and organization bootstrap complete" tone="reachable" />
+        <StatusMetric label="Operator role" value={session.user.role} detail="Navigation and actions are role-aware" tone="neutral" />
+        <StatusMetric label="Next delivery" value="W2" detail="Live fleet dashboard and operational state" tone="neutral" />
       </section>
 
       <section className="two-column-grid">
+        <article className="panel">
+          <div className="panel-heading">
+            <div>
+              <span className="eyebrow">Authenticated tenant</span>
+              <h3>Operator session</h3>
+            </div>
+            <span className="connection-chip connection-chip--reachable">authenticated</span>
+          </div>
+          <dl className="detail-list">
+            <div><dt>Organization</dt><dd>{session.organization.name}</dd></div>
+            <div><dt>Organization slug</dt><dd>{session.organization.slug}</dd></div>
+            <div><dt>Operator</dt><dd>{session.user.fullName}</dd></div>
+            <div><dt>Email</dt><dd>{session.user.email}</dd></div>
+            <div><dt>Role</dt><dd>{session.user.role}</dd></div>
+            <div><dt>Session expires</dt><dd>{expiresAt}</dd></div>
+          </dl>
+          <p className="panel-note">
+            The access token is tab-scoped through sessionStorage. It is not stored in localStorage and is removed on logout or invalid session verification.
+          </p>
+        </article>
+
         <article className="panel">
           <div className="panel-heading">
             <div>
@@ -98,26 +125,7 @@ export function FoundationPage() {
             <div><dt>Last health check</dt><dd>{checkedAt}</dd></div>
           </dl>
           <p className="panel-note">
-            Port 3001 matches the backend development CORS default. Production URLs are supplied through environment configuration.
-          </p>
-        </article>
-
-        <article className="panel architecture-panel">
-          <div className="panel-heading">
-            <div>
-              <span className="eyebrow">System boundary</span>
-              <h3>Operational responsibility</h3>
-            </div>
-          </div>
-          <div className="architecture-flow">
-            <div><strong>Mobile</strong><span>Perception + local driver alarm</span></div>
-            <span className="flow-arrow">→</span>
-            <div><strong>Backend</strong><span>Risk + alerts + persistence</span></div>
-            <span className="flow-arrow">→</span>
-            <div><strong>Web</strong><span>Supervisor operations</span></div>
-          </div>
-          <p className="panel-note">
-            The web console supervises fleet state; it is never the primary wake-up mechanism for a drowsy driver.
+            Port 3001 matches the backend development CORS configuration. Production URLs are supplied through environment configuration.
           </p>
         </article>
       </section>
@@ -128,7 +136,7 @@ export function FoundationPage() {
             <span className="eyebrow">Delivery plan</span>
             <h3>Web phases</h3>
           </div>
-          <span className="roadmap-progress">1 / 7 phases</span>
+          <span className="roadmap-progress">2 / 7 phases</span>
         </div>
         <div className="roadmap-list">
           {roadmap.map(([phase, title, description, status]) => (
