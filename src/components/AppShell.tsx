@@ -1,25 +1,27 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 
-const navigation = [
-  { to: '/', label: 'Overview', phase: 'W0', monogram: 'OV' },
-  { to: '/live-fleet', label: 'Live Fleet', phase: 'W2', monogram: 'LF' },
-  { to: '/alerts', label: 'Alert Center', phase: 'W3', monogram: 'AL' },
-  { to: '/safety-events', label: 'Safety Events', phase: 'W4', monogram: 'SE' },
-  { to: '/analytics', label: 'Analytics', phase: 'W4', monogram: 'AN' },
-  { to: '/drivers', label: 'Drivers', phase: 'W5', monogram: 'DR' },
-  { to: '/vehicles', label: 'Vehicles', phase: 'W5', monogram: 'VH' },
-  { to: '/devices', label: 'Devices', phase: 'W5', monogram: 'DV' },
-  { to: '/risk-policies', label: 'Risk Policies', phase: 'W5', monogram: 'RP' },
-  { to: '/settings', label: 'Settings', phase: 'W5', monogram: 'ST' },
-];
+import { useAuth } from '../auth/AuthContext';
+import { navigationForRole, navigationItems } from '../auth/navigation';
 
-const pageNames = new Map(navigation.map((item) => [item.to, item.label]));
+const pageNames = new Map(navigationItems.map((item) => [item.to, item.label]));
+
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('') || 'OP';
+}
 
 export function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
-  const pageTitle = pageNames.get(location.pathname) ?? 'SafeFleet AI';
+  const auth = useAuth();
+  const session = auth.session!;
+  const navigation = navigationForRole(session.user.role);
+  const pageTitle = pageNames.get(location.pathname) ?? (location.pathname === '/forbidden' ? 'Access restricted' : 'SafeFleet AI');
 
   return (
     <div className="app-frame">
@@ -37,8 +39,8 @@ export function AppShell() {
         <div className="workspace-pill">
           <span className="workspace-dot" />
           <div>
-            <strong>Web Foundation</strong>
-            <small>Phase W0</small>
+            <strong>{session.organization.name}</strong>
+            <small>{session.user.role} · {session.organization.slug}</small>
           </div>
         </div>
 
@@ -59,9 +61,12 @@ export function AppShell() {
         </nav>
 
         <div className="sidebar-footer">
-          <span className="eyebrow">Architecture</span>
-          <strong>Mobile → Backend → Web</strong>
-          <small>Operational data only. Immediate driver alarms stay on-device.</small>
+          <span className="eyebrow">Signed in</span>
+          <strong>{session.user.fullName}</strong>
+          <small>{session.user.email}</small>
+          <button type="button" className="sidebar-logout" onClick={() => auth.logout()}>
+            Sign out
+          </button>
         </div>
       </aside>
 
@@ -83,8 +88,16 @@ export function AppShell() {
             </div>
           </div>
           <div className="topbar-actions">
-            <span className="environment-badge">LOCAL / W0</span>
-            <div className="operator-avatar" aria-label="Authentication arrives in W1">OP</div>
+            <span className="environment-badge">W1 · {session.user.role}</span>
+            <div className="operator-identity">
+              <div>
+                <strong>{session.user.fullName}</strong>
+                <span>{session.organization.name}</span>
+              </div>
+              <div className="operator-avatar" aria-label={`Signed in as ${session.user.fullName}`}>
+                {initials(session.user.fullName)}
+              </div>
+            </div>
           </div>
         </header>
 
