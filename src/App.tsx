@@ -3,6 +3,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { ADMIN_ROLES, SUPERVISOR_MANAGEMENT_ROLES } from './auth/navigation';
 import { ProtectedRoute, RequireRoles } from './auth/RouteGuards';
 import { AppShell } from './components/AppShell';
+import { AlertCenterPage } from './pages/AlertCenterPage';
+import { AlertDetailPage } from './pages/AlertDetailPage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ForbiddenPage } from './pages/ForbiddenPage';
@@ -19,7 +21,8 @@ export function App() {
           <Route index element={<DashboardPage />} />
           <Route path="overview" element={<Navigate to="/" replace />} />
           <Route path="live-fleet" element={<LiveFleetPage />} />
-          <Route path="alerts" element={<ComingSoonPage phase="W3" title="Alert Center" />} />
+          <Route path="alerts" element={<AlertCenterPage />} />
+          <Route path="alerts/:alertId" element={<AlertDetailPage />} />
           <Route path="safety-events" element={<ComingSoonPage phase="W4" title="Safety Events" />} />
           <Route path="analytics" element={<ComingSoonPage phase="W4" title="Analytics" />} />
           <Route path="forbidden" element={<ForbiddenPage />} />

@@ -24,8 +24,8 @@ SafeFleet Web
 | **W0** | React/TypeScript/Vite foundation, responsive operations shell, health diagnostics, CI | ✅ Complete | [W0 detail](docs/W0_WEB_FOUNDATION.md) |
 | **W1** | Organization login, JWT session, protected routes, RBAC-aware navigation | ✅ Complete | [W1 detail](docs/W1_AUTHENTICATION_AND_SESSION.md) |
 | **W2** | Real dashboard summary, live fleet/GPS/risk state, realtime synchronization | ✅ Complete | [W2 detail](docs/W2_LIVE_FLEET_DASHBOARD.md) |
-| **W3** | Realtime alert queue, detail/history, assign/acknowledge/escalate/resolve | Next | [W3 detail](docs/W3_REALTIME_ALERT_CENTER.md) |
-| **W4** | Safety-event history, drowsiness details, feedback, trends/model/latency analytics | Planned | [W4 detail](docs/W4_SAFETY_HISTORY_AND_ANALYTICS.md) |
+| **W3** | Realtime alert queue, detail/history, assign/acknowledge/escalate/resolve | ✅ Complete | [W3 detail](docs/W3_REALTIME_ALERT_CENTER.md) |
+| **W4** | Safety-event history, drowsiness details, feedback, trends/model/latency analytics | Next | [W4 detail](docs/W4_SAFETY_HISTORY_AND_ANALYTICS.md) |
 | **W5** | Fleet/driver/vehicle/device/assignment/trip administration and risk policies | Planned | [W5 detail](docs/W5_FLEET_ADMIN_AND_RISK_POLICY.md) |
 | **W6** | Accessibility, E2E, security, resilience, performance and production deployment | Planned | [W6 detail](docs/W6_VALIDATION_AND_RELEASE.md) |
 
@@ -59,7 +59,7 @@ Those values are development-only seed credentials and must not be reused in a d
 
 ## Current web contract
 
-W1 authentication:
+Authentication:
 
 ```text
 POST /api/v1/auth/login
@@ -67,7 +67,7 @@ GET  /api/v1/auth/me
 GET  /api/v1/organizations/current
 ```
 
-W2 operations:
+Fleet operations:
 
 ```text
 GET /api/v1/dashboard/summary
@@ -76,11 +76,23 @@ GET /api/v1/dashboard/active-alerts
 Socket.IO /realtime
 ```
 
+Alert operations:
+
+```text
+GET  /api/v1/alerts
+GET  /api/v1/alerts/:id
+GET  /api/v1/alerts/:id/history
+POST /api/v1/alerts/:id/assign
+POST /api/v1/alerts/:id/acknowledge
+POST /api/v1/alerts/:id/escalate
+POST /api/v1/alerts/:id/resolve
+```
+
 The browser stores the access token only in memory and `sessionStorage`, not `localStorage`. Backend tenant scope remains authoritative.
 
-The W2 overview and `/live-fleet` use real backend snapshots. Socket.IO events invalidate the local cache and trigger debounced REST synchronization. Missing GPS/risk/telemetry values remain visibly unavailable; the frontend does not create placeholder operational values.
+W2 overview and `/live-fleet` use real backend snapshots. W3 `/alerts` uses the backend alert queue, lifecycle history and supervisor actions. Socket.IO events invalidate local snapshots and trigger debounced REST synchronization, avoiding duplicate queue entries after repeated realtime events.
 
-The map uses Leaflet and OpenStreetMap tiles for backend-provided GPS positions.
+Alert mutations are enabled only for `OWNER`, `ADMIN`, and `SUPERVISOR`, matching the backend controller. Read-only roles retain visibility without receiving browser-only mutation authority.
 
 ## Validation
 
