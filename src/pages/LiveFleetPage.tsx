@@ -43,7 +43,7 @@ export function LiveFleetPage() {
   const operations = useFleetOperations();
   const [filters, setFilters] = useState<LiveFleetFilters>(DEFAULT_LIVE_FLEET_FILTERS);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
-  const items = operations.liveFleet?.items ?? [];
+  const items = useMemo(() => operations.liveFleet?.items ?? [], [operations.liveFleet]);
   const filteredItems = useMemo(() => filterLiveFleetItems(items, filters), [filters, items]);
   const selected = items.find((item) => item.tripId === selectedTripId) ?? null;
   const fleets = useMemo(() => {

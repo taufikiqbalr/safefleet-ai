@@ -65,7 +65,7 @@ function AlertRow({ alert }: { alert: ActiveAlert }) {
 export function DashboardPage() {
   const operations = useFleetOperations();
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
-  const liveItems = operations.liveFleet?.items ?? [];
+  const liveItems = useMemo(() => operations.liveFleet?.items ?? [], [operations.liveFleet]);
   const selectedItem = useMemo(
     () => liveItems.find((item) => item.tripId === selectedTripId) ?? null,
     [liveItems, selectedTripId],

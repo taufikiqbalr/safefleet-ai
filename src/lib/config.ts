@@ -10,8 +10,8 @@ export function deriveRealtimeBaseUrl(apiBaseUrl: string): string {
   const url = new URL(normalizeApiBaseUrl(apiBaseUrl));
   url.search = '';
   url.hash = '';
-  url.pathname = url.pathname.replace(/\/api\/v\d+$/i, '').replace(/\/+$/, '');
-  return `${url.origin}${url.pathname}`;
+  const pathname = url.pathname.replace(/\/api\/v\d+$/i, '').replace(/\/+$/, '');
+  return pathname && pathname !== '/' ? `${url.origin}${pathname}` : url.origin;
 }
 
 const apiBaseUrl = normalizeApiBaseUrl(
