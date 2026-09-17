@@ -43,9 +43,9 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3001`.
+Open `http://localhost:6200`.
 
-The default backend URL is `http://localhost:3000/api/v1`. Port `3001` intentionally matches the backend development CORS configuration.
+The default backend URL is `http://localhost:6100/api/v1`. Port `6200` intentionally matches the backend development CORS configuration. Local SafeFleet host-facing services use the 6xxx range.
 
 When the backend uses its default development seed, the local operator account is:
 

@@ -4,8 +4,8 @@ import { deriveRealtimeBaseUrl, normalizeApiBaseUrl } from './config';
 
 describe('normalizeApiBaseUrl', () => {
   it('removes trailing slashes and whitespace', () => {
-    expect(normalizeApiBaseUrl('  http://localhost:3000/api/v1/// ')).toBe(
-      'http://localhost:3000/api/v1',
+    expect(normalizeApiBaseUrl('  http://localhost:6100/api/v1/// ')).toBe(
+      'http://localhost:6100/api/v1',
     );
   });
 
@@ -24,7 +24,7 @@ describe('normalizeApiBaseUrl', () => {
 
 describe('deriveRealtimeBaseUrl', () => {
   it('removes the versioned API suffix for Socket.IO', () => {
-    expect(deriveRealtimeBaseUrl('http://localhost:3000/api/v1')).toBe('http://localhost:3000');
+    expect(deriveRealtimeBaseUrl('http://localhost:6100/api/v1')).toBe('http://localhost:6100');
     expect(deriveRealtimeBaseUrl('https://example.com/safefleet/api/v2')).toBe('https://example.com/safefleet');
   });
 });

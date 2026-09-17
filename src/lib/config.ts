@@ -15,11 +15,11 @@ export function deriveRealtimeBaseUrl(apiBaseUrl: string): string {
 }
 
 const apiBaseUrl = normalizeApiBaseUrl(
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1',
+  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:6100/api/v1',
 );
 
 export const appConfig = Object.freeze({
   apiBaseUrl,
   realtimeBaseUrl: deriveRealtimeBaseUrl(apiBaseUrl),
-  webVersion: '0.3.0',
+  webVersion: '0.5.0',
 });
