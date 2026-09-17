@@ -23,8 +23,8 @@ SafeFleet Web
 | --- | --- | --- | --- |
 | **W0** | React/TypeScript/Vite foundation, responsive operations shell, health diagnostics, CI | ✅ Complete | [W0 detail](docs/W0_WEB_FOUNDATION.md) |
 | **W1** | Organization login, JWT session, protected routes, RBAC-aware navigation | ✅ Complete | [W1 detail](docs/W1_AUTHENTICATION_AND_SESSION.md) |
-| **W2** | Real dashboard summary, live fleet/GPS/risk state, realtime synchronization | Next | [W2 detail](docs/W2_LIVE_FLEET_DASHBOARD.md) |
-| **W3** | Realtime alert queue, detail/history, assign/acknowledge/escalate/resolve | Planned | [W3 detail](docs/W3_REALTIME_ALERT_CENTER.md) |
+| **W2** | Real dashboard summary, live fleet/GPS/risk state, realtime synchronization | ✅ Complete | [W2 detail](docs/W2_LIVE_FLEET_DASHBOARD.md) |
+| **W3** | Realtime alert queue, detail/history, assign/acknowledge/escalate/resolve | Next | [W3 detail](docs/W3_REALTIME_ALERT_CENTER.md) |
 | **W4** | Safety-event history, drowsiness details, feedback, trends/model/latency analytics | Planned | [W4 detail](docs/W4_SAFETY_HISTORY_AND_ANALYTICS.md) |
 | **W5** | Fleet/driver/vehicle/device/assignment/trip administration and risk policies | Planned | [W5 detail](docs/W5_FLEET_ADMIN_AND_RISK_POLICY.md) |
 | **W6** | Accessibility, E2E, security, resilience, performance and production deployment | Planned | [W6 detail](docs/W6_VALIDATION_AND_RELEASE.md) |
@@ -55,36 +55,32 @@ email:        admin@safefleet.local
 password:     ChangeMe123!
 ```
 
-Those values are development-only seed credentials from the backend configuration and must not be reused in a deployed environment.
+Those values are development-only seed credentials and must not be reused in a deployed environment.
 
-## W1 authentication model
+## Current web contract
 
-W1 uses the backend contracts:
+W1 authentication:
 
 ```text
 POST /api/v1/auth/login
 GET  /api/v1/auth/me
 GET  /api/v1/organizations/current
-POST /api/v1/auth/change-password
 ```
 
-The browser stores the access token only in memory and `sessionStorage`, not `localStorage`. A refresh in the same tab can recover the session, but the app revalidates both the user and organization against the backend before opening protected routes.
-
-Current backend roles used by the UI are:
+W2 operations:
 
 ```text
-OWNER
-ADMIN
-SUPERVISOR
-ANALYST
-VIEWER
+GET /api/v1/dashboard/summary
+GET /api/v1/dashboard/live-fleet
+GET /api/v1/dashboard/active-alerts
+Socket.IO /realtime
 ```
 
-Navigation hiding and route guards improve the operator experience; backend authorization remains authoritative.
+The browser stores the access token only in memory and `sessionStorage`, not `localStorage`. Backend tenant scope remains authoritative.
 
-## Current experience
+The W2 overview and `/live-fleet` use real backend snapshots. Socket.IO events invalidate the local cache and trigger debounced REST synchronization. Missing GPS/risk/telemetry values remain visibly unavailable; the frontend does not create placeholder operational values.
 
-After successful login, the W1 overview shows real authenticated organization/user identity, backend reachability, role, and session expiry. W2+ operational routes remain explicit phase placeholders until their real API integrations are implemented. No fake drivers, alerts, GPS positions, risk scores, or analytics are rendered.
+The map uses Leaflet and OpenStreetMap tiles for backend-provided GPS positions.
 
 ## Validation
 

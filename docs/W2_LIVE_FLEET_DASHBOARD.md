@@ -1,22 +1,97 @@
 # W2 — Live Fleet Operations Dashboard
 
-## Objective
+## Status
 
-Replace W0 foundation placeholders with real fleet operational state from the Phase 4 backend and establish the primary supervisor overview.
+**Complete.** W2 replaces the foundation overview with real authenticated fleet state from SafeFleet Backend and adds the primary supervisor live-fleet surface.
 
 ## Backend contracts
 
 ```text
 GET /api/v1/dashboard/summary
-GET /api/v1/dashboard/live-fleet
-GET /api/v1/dashboard/active-alerts
+GET /api/v1/dashboard/live-fleet?staleAfterSeconds=120
+GET /api/v1/dashboard/active-alerts?limit=25
 ```
 
-Realtime namespace/events available from the backend will be consumed after authenticated Socket.IO setup:
+Every request uses the W1 JWT session. Tenant identity is never supplied by the browser; the backend derives the organization from the authenticated user.
+
+## Overview dashboard
+
+`/` now renders only backend-provided operational values:
+
+- active trips;
+- active alerts;
+- online devices;
+- safety events captured in the last 24 hours;
+- alerts created in the last 24 hours;
+- active driver count;
+- active-alert severity distribution;
+- latest-risk distribution for active trips;
+- active-alert queue preview;
+- live active-trip table;
+- latest GPS map when coordinates are available.
+
+Missing risk, GPS, speed, battery, network, or fleet values are rendered as explicit unavailable states. The frontend does not coerce absent values to zero or fabricate demo vehicles.
+
+## Live fleet route
+
+`/live-fleet` exposes the full loaded active-trip snapshot. Each row can display:
+
+```text
+driver / employee code
+vehicle / plate
+fleet
+trip start
+ONLINE / STALE / OFFLINE
+latest seen
+latest risk / risk score
+active alert state
+speed
+battery
+network
+latitude / longitude
+```
+
+The backend `staleAfterSeconds` setting remains authoritative for connection classification. W2 currently requests 120 seconds, which is inside the backend-supported 30–3600 second range.
+
+## Snapshot filters
+
+W2 provides client-side filters for:
+
+- driver / plate / fleet / device text search;
+- risk level or missing risk snapshot;
+- connection status;
+- active-alert presence;
+- fleet identity.
+
+The UI explicitly says these filters apply to the currently loaded REST snapshot. It does not imply a server-wide search beyond the data returned by `/dashboard/live-fleet`.
+
+## Fleet map
+
+The map uses Leaflet with OpenStreetMap tiles. Only rows containing backend-provided valid latitude/longitude values receive markers. The marker overlay contains driver/vehicle context already returned by SafeFleet Backend; no GPS interpolation is generated.
+
+Marker state communicates:
+
+- latest risk level;
+- ONLINE / STALE / OFFLINE opacity;
+- selected trip context.
+
+Selecting a marker selects the same trip context used by the tabular view. When no coordinates are available, the map shows no invented vehicle position.
+
+The browser downloads OpenStreetMap tile imagery directly from the public tile service. A production deployment can replace this provider without changing the SafeFleet fleet-state contract.
+
+## Realtime synchronization
+
+W2 connects to the backend Socket.IO namespace:
 
 ```text
 /realtime
-session.ready
+```
+
+with the W1 access token in `auth.token`. It waits for the backend `session.ready` event and verifies the returned organization ID before declaring realtime ready.
+
+Events observed:
+
+```text
 telemetry.location.updated
 safety.event.created
 risk.updated
@@ -25,73 +100,78 @@ alert.updated
 sensor.reading.updated
 ```
 
-## Dashboard summary
+For the MVP, realtime messages are treated as cache invalidations instead of being trusted as a second authoritative entity model. Relevant events trigger a debounced re-fetch of the three REST snapshots. Telemetry invalidations use a longer debounce than alert/risk events to avoid making one dashboard HTTP request per incoming location point.
 
-The summary surface should expose backend-provided values such as active trips, active alerts, recent safety-event counts, and risk distribution. The frontend must render returned values; it must not infer missing KPI semantics from unrelated counters.
+On a Socket.IO reconnect, `session.ready` triggers a fresh REST synchronization before the UI returns to `ready`. This prevents a websocket outage from silently leaving gaps in fleet state.
 
-## Live fleet state
+## Realtime UI states
 
-Each live-fleet row/card is expected to present, when available:
-
-- driver identity;
-- vehicle identity/plate;
-- active trip;
-- latest latitude/longitude;
-- speed;
-- battery;
-- network state;
-- current risk level;
-- active alert state;
-- ONLINE / STALE / OFFLINE state;
-- last update timestamp.
-
-Missing values use explicit unavailable states rather than fake zeroes.
-
-## Map
-
-W2 will add a geospatial fleet view. Map provider/library selection remains an implementation decision, but the application contract is provider-neutral:
-
-- plot only backend-provided coordinates;
-- distinguish stale/offline location state;
-- selecting a marker opens the same driver/vehicle/trip context used by the list;
-- clustering is introduced if the number of visible vehicles makes individual markers unreadable;
-- no location interpolation is presented as measured GPS.
-
-## Realtime cache strategy
-
-Initial page load comes from REST snapshots. Socket.IO then applies newer events to the in-memory view.
+The operator can distinguish:
 
 ```text
-REST snapshot
-    |
-    v
-render current state
-    |
-    v
-Socket.IO updates
-    |
-    v
-patch affected entities
+connecting
+synchronizing
+ready
+reconnecting
+disconnected
 ```
 
-On reconnect, the app re-fetches the REST snapshot before accepting the connection as fully synchronized, preventing silent gaps during disconnection.
+The dashboard also displays the last successful synchronization time and most recent realtime invalidation event name. Tokens and authorization headers are never rendered.
 
-## Filters
+## Error and empty states
 
-Initial filters should include only dimensions supported cleanly by the API response/query contract, such as risk, connectivity, fleet, or alert state. Client-only filtering is acceptable for the currently loaded snapshot but must be labelled/implemented so it does not imply server-wide search.
+W2 distinguishes:
 
-## UX states
+- initial REST loading;
+- no active trips;
+- no active alerts;
+- no risk snapshot;
+- no GPS coordinates;
+- recoverable backend refresh errors;
+- expired HTTP session (`401`, delegated to W1 logout);
+- websocket reconnecting/disconnected state.
 
-Every dashboard surface must have distinct:
+A successful previous snapshot remains visible during a later refresh error so operators do not lose all context because of a transient request failure.
 
-- initial loading;
-- empty fleet;
-- backend error;
-- websocket disconnected/reconnecting;
-- stale vehicle data;
-- offline vehicle data;
-- no GPS available.
+## Tests
+
+W2 adds unit coverage for:
+
+- numeric API normalization;
+- valid/invalid GPS coordinate detection;
+- risk and connection filtering;
+- driver/vehicle/fleet text filtering;
+- realtime base URL derivation from the versioned REST API URL.
+
+W0/W1 tests remain in the same CI suite.
 
 ## Acceptance criteria
 
-W2 is complete when an authenticated supervisor can open the dashboard, see real backend summary/live-fleet/active-alert data, receive realtime updates without manual refresh, recognize stale/offline data, and recover correctly after a temporary Socket.IO disconnect.
+W2 is complete when:
+
+1. the authenticated overview uses `/dashboard/summary`, `/dashboard/live-fleet`, and `/dashboard/active-alerts`;
+2. `/live-fleet` renders actual backend active-trip data;
+3. missing values are explicit instead of fabricated;
+4. backend GPS points are visible on a fleet map;
+5. loaded-snapshot filters work without changing tenant scope;
+6. Socket.IO authenticates with the current W1 token;
+7. realtime events refresh operational REST state without manual reload;
+8. reconnect performs REST recovery before realtime is marked ready;
+9. 401 responses return through the W1 session invalidation boundary;
+10. lint, unit tests, and production build are green.
+
+## Next phase — W3
+
+W3 turns the active-alert preview into the full supervisor alert workflow:
+
+```text
+GET  /api/v1/alerts
+GET  /api/v1/alerts/:id
+GET  /api/v1/alerts/:id/history
+POST /api/v1/alerts/:id/assign
+POST /api/v1/alerts/:id/acknowledge
+POST /api/v1/alerts/:id/escalate
+POST /api/v1/alerts/:id/resolve
+```
+
+It will keep the W2 realtime invalidation/recovery strategy while adding alert detail, lifecycle history, ownership, notes, and role-aware actions.

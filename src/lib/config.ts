@@ -6,9 +6,20 @@ export function normalizeApiBaseUrl(value: string): string {
   return normalized;
 }
 
+export function deriveRealtimeBaseUrl(apiBaseUrl: string): string {
+  const url = new URL(normalizeApiBaseUrl(apiBaseUrl));
+  url.search = '';
+  url.hash = '';
+  url.pathname = url.pathname.replace(/\/api\/v\d+$/i, '').replace(/\/+$/, '');
+  return `${url.origin}${url.pathname}`;
+}
+
+const apiBaseUrl = normalizeApiBaseUrl(
+  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1',
+);
+
 export const appConfig = Object.freeze({
-  apiBaseUrl: normalizeApiBaseUrl(
-    import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1',
-  ),
-  webVersion: '0.2.0',
+  apiBaseUrl,
+  realtimeBaseUrl: deriveRealtimeBaseUrl(apiBaseUrl),
+  webVersion: '0.3.0',
 });

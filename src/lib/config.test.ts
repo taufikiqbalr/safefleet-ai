@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { normalizeApiBaseUrl } from './config';
+import { deriveRealtimeBaseUrl, normalizeApiBaseUrl } from './config';
 
 describe('normalizeApiBaseUrl', () => {
   it('removes trailing slashes and whitespace', () => {
@@ -19,5 +19,12 @@ describe('normalizeApiBaseUrl', () => {
     expect(() => normalizeApiBaseUrl('file:///tmp/backend')).toThrow(
       'VITE_API_BASE_URL must use http:// or https://',
     );
+  });
+});
+
+describe('deriveRealtimeBaseUrl', () => {
+  it('removes the versioned API suffix for Socket.IO', () => {
+    expect(deriveRealtimeBaseUrl('http://localhost:3000/api/v1')).toBe('http://localhost:3000');
+    expect(deriveRealtimeBaseUrl('https://example.com/safefleet/api/v2')).toBe('https://example.com/safefleet');
   });
 });

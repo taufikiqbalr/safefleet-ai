@@ -4,8 +4,9 @@ import { ADMIN_ROLES, SUPERVISOR_MANAGEMENT_ROLES } from './auth/navigation';
 import { ProtectedRoute, RequireRoles } from './auth/RouteGuards';
 import { AppShell } from './components/AppShell';
 import { ComingSoonPage } from './pages/ComingSoonPage';
+import { DashboardPage } from './pages/DashboardPage';
 import { ForbiddenPage } from './pages/ForbiddenPage';
-import { FoundationPage } from './pages/FoundationPage';
+import { LiveFleetPage } from './pages/LiveFleetPage';
 import { LoginPage } from './pages/LoginPage';
 
 export function App() {
@@ -15,9 +16,9 @@ export function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
-          <Route index element={<FoundationPage />} />
+          <Route index element={<DashboardPage />} />
           <Route path="overview" element={<Navigate to="/" replace />} />
-          <Route path="live-fleet" element={<ComingSoonPage phase="W2" title="Live Fleet" />} />
+          <Route path="live-fleet" element={<LiveFleetPage />} />
           <Route path="alerts" element={<ComingSoonPage phase="W3" title="Alert Center" />} />
           <Route path="safety-events" element={<ComingSoonPage phase="W4" title="Safety Events" />} />
           <Route path="analytics" element={<ComingSoonPage phase="W4" title="Analytics" />} />

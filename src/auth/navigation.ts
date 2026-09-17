@@ -12,7 +12,7 @@ export const SUPERVISOR_MANAGEMENT_ROLES = ['OWNER', 'ADMIN', 'SUPERVISOR'] as c
 export const ADMIN_ROLES = ['OWNER', 'ADMIN'] as const satisfies readonly UserRole[];
 
 export const navigationItems: readonly NavigationItem[] = [
-  { to: '/', label: 'Overview', phase: 'W1', monogram: 'OV' },
+  { to: '/', label: 'Overview', phase: 'W2', monogram: 'OV' },
   { to: '/live-fleet', label: 'Live Fleet', phase: 'W2', monogram: 'LF' },
   { to: '/alerts', label: 'Alert Center', phase: 'W3', monogram: 'AL' },
   { to: '/safety-events', label: 'Safety Events', phase: 'W4', monogram: 'SE' },
