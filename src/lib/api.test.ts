@@ -36,9 +36,13 @@ describe('W1 authenticated API client', () => {
       headers: { 'content-type': 'application/json' },
     })));
 
-    await expect(getCurrentUser('expired-token')).rejects.toMatchObject<ApiError>({
-      status: 401,
-      message: 'Unauthorized',
-    });
+    try {
+      await getCurrentUser('expired-token');
+      throw new Error('Expected getCurrentUser to reject');
+    } catch (error) {
+      expect(error).toBeInstanceOf(ApiError);
+      expect((error as ApiError).status).toBe(401);
+      expect((error as ApiError).message).toBe('Unauthorized');
+    }
   });
 });
