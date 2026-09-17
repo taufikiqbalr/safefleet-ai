@@ -25,8 +25,8 @@ SafeFleet Web
 | **W1** | Organization login, JWT session, protected routes, RBAC-aware navigation | ✅ Complete | [W1 detail](docs/W1_AUTHENTICATION_AND_SESSION.md) |
 | **W2** | Real dashboard summary, live fleet/GPS/risk state, realtime synchronization | ✅ Complete | [W2 detail](docs/W2_LIVE_FLEET_DASHBOARD.md) |
 | **W3** | Realtime alert queue, detail/history, assign/acknowledge/escalate/resolve | ✅ Complete | [W3 detail](docs/W3_REALTIME_ALERT_CENTER.md) |
-| **W4** | Safety-event history, drowsiness details, feedback, trends/model/latency analytics | Next | [W4 detail](docs/W4_SAFETY_HISTORY_AND_ANALYTICS.md) |
-| **W5** | Fleet/driver/vehicle/device/assignment/trip administration and risk policies | Planned | [W5 detail](docs/W5_FLEET_ADMIN_AND_RISK_POLICY.md) |
+| **W4** | Safety-event history, drowsiness details, feedback, trends/model/latency analytics | ✅ Complete | [W4 detail](docs/W4_SAFETY_HISTORY_AND_ANALYTICS.md) |
+| **W5** | Fleet/driver/vehicle/device/assignment/trip administration and risk policies | Next | [W5 detail](docs/W5_FLEET_ADMIN_AND_RISK_POLICY.md) |
 | **W6** | Accessibility, E2E, security, resilience, performance and production deployment | Planned | [W6 detail](docs/W6_VALIDATION_AND_RELEASE.md) |
 
 Overall dependency and MVP boundary: [Web roadmap](docs/WEB_ROADMAP.md).
@@ -88,11 +88,30 @@ POST /api/v1/alerts/:id/escalate
 POST /api/v1/alerts/:id/resolve
 ```
 
+Safety history and analytics:
+
+```text
+GET  /api/v1/safety-events
+GET  /api/v1/safety-events/:id
+GET  /api/v1/drowsiness-events/:eventId
+GET  /api/v1/safety-events/:id/feedback
+POST /api/v1/safety-events/:id/feedback
+GET  /api/v1/risk-snapshots
+GET  /api/v1/telemetry
+GET  /api/v1/sensor-readings
+GET  /api/v1/analytics/overview
+GET  /api/v1/analytics/trends
+GET  /api/v1/analytics/models
+GET  /api/v1/analytics/latency
+```
+
 The browser stores the access token only in memory and `sessionStorage`, not `localStorage`. Backend tenant scope remains authoritative.
 
-W2 overview and `/live-fleet` use real backend snapshots. W3 `/alerts` uses the backend alert queue, lifecycle history and supervisor actions. Socket.IO events invalidate local snapshots and trigger debounced REST synchronization, avoiding duplicate queue entries after repeated realtime events.
+W2 overview and `/live-fleet` use real backend snapshots. W3 `/alerts` uses the backend alert queue, lifecycle history and supervisor actions. W4 `/safety-events` and `/analytics` provide historical investigation, drowsiness evidence, human feedback, event-adjacent telemetry/sensor context, descriptive model/profile groups and latency visibility.
 
-Alert mutations are enabled only for `OWNER`, `ADMIN`, and `SUPERVISOR`, matching the backend controller. Read-only roles retain visibility without receiving browser-only mutation authority.
+Socket.IO events invalidate live/event snapshots and trigger debounced REST synchronization. Historical analytics remain explicit selected-range snapshots rather than redrawing on every device event.
+
+Safety review writes are enabled for `OWNER`, `ADMIN`, `SUPERVISOR`, and `ANALYST`, matching the backend controller. `VIEWER` remains read-only. The UI does not invent universal EAR/MAR/PERCLOS thresholds, toxic-gas thresholds, model rankings, or causal conclusions that are not provided by the backend data.
 
 ## Validation
 
