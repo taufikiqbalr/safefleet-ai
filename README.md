@@ -19,79 +19,19 @@ SafeFleet Web
 
 ## Phased implementation
 
-### W0 — Web foundation
+| Phase | Focus | Detail |
+| --- | --- | --- |
+| **W0** | React/TypeScript/Vite foundation, responsive operations shell, health diagnostics, CI | [W0 detail](docs/W0_WEB_FOUNDATION.md) |
+| **W1** | Organization login, JWT session, protected routes, RBAC-aware navigation | [W1 detail](docs/W1_AUTHENTICATION_AND_SESSION.md) |
+| **W2** | Real dashboard summary, live fleet/GPS/risk state, realtime synchronization | [W2 detail](docs/W2_LIVE_FLEET_DASHBOARD.md) |
+| **W3** | Realtime alert queue, detail/history, assign/acknowledge/escalate/resolve | [W3 detail](docs/W3_REALTIME_ALERT_CENTER.md) |
+| **W4** | Safety-event history, drowsiness details, feedback, trends/model/latency analytics | [W4 detail](docs/W4_SAFETY_HISTORY_AND_ANALYTICS.md) |
+| **W5** | Fleet/driver/vehicle/device/assignment/trip administration and risk policies | [W5 detail](docs/W5_FLEET_ADMIN_AND_RISK_POLICY.md) |
+| **W6** | Accessibility, E2E, security, resilience, performance and production deployment | [W6 detail](docs/W6_VALIDATION_AND_RELEASE.md) |
 
-- React + TypeScript + Vite application shell;
-- responsive fleet-operations layout;
-- navigation and route boundaries;
-- environment-based backend configuration;
-- backend health diagnostics;
-- reusable UI primitives and design tokens;
-- lint, unit test, production build, and GitHub Actions CI;
-- no fabricated fleet data in the foundation phase.
+Overall dependency and MVP boundary: [Web roadmap](docs/WEB_ROADMAP.md).
 
-### W1 — Authentication and tenant session
-
-- organization-scoped login;
-- backend JWT session;
-- authenticated `/auth/me` bootstrap;
-- protected routes;
-- role-aware navigation for OWNER/ADMIN/SUPERVISOR/ANALYST/VIEWER;
-- logout/session expiry handling;
-- API error boundary and unauthorized recovery.
-
-### W2 — Live fleet operations dashboard
-
-- `/dashboard/summary` KPI cards;
-- `/dashboard/live-fleet` live vehicle/driver state;
-- live map and status clustering;
-- active trip state;
-- latest GPS/speed/battery/network state;
-- risk distribution and active alerts;
-- stale/offline visualization;
-- operational empty/loading/error states.
-
-### W3 — Realtime alert center
-
-- Socket.IO `/realtime` tenant session;
-- safety/risk/alert/telemetry/sensor realtime updates;
-- alert queue and filters;
-- alert detail/history;
-- assignment;
-- acknowledge/escalate/resolve actions;
-- realtime dashboard cache updates without polling everything.
-
-### W4 — Safety history and analytics
-
-- safety-event history;
-- driver/vehicle/trip drill-down;
-- drowsiness detail metrics;
-- event feedback CONFIRMED/FALSE_ALARM/UNCERTAIN;
-- analytics overview and trends;
-- model/threshold comparison;
-- latency analytics;
-- report-ready filters and views.
-
-### W5 — Fleet administration and policy
-
-- fleets, drivers, vehicles, devices, assignments, and trips management;
-- device credential rotation workflow for mobile provisioning;
-- risk policy creation/versioning/activation;
-- organization configuration;
-- role-aware administrative actions.
-
-### W6 — Validation and release hardening
-
-- responsive/mobile-browser verification;
-- accessibility pass;
-- route-level error recovery;
-- component/integration tests for critical operator flows;
-- production environment configuration;
-- security/deployment guidance;
-- performance and bundle review;
-- demo/release checklist.
-
-Each phase has a detailed document under `docs/`, a clear acceptance boundary, and CI must be green before the phase is considered complete.
+Each phase has a clear acceptance boundary and CI must be green before the phase is considered complete.
 
 ## W0 quick start
 
@@ -107,6 +47,8 @@ Open `http://localhost:3001`.
 
 The default backend URL is `http://localhost:3000/api/v1`. Port `3001` intentionally matches the backend development CORS default.
 
+W0 is backend-aware but does not fabricate drivers, alerts, GPS positions, risk scores, or analytics. The overview can be tried with the backend online or offline; it shows real backend liveness state and the phased product shell.
+
 Validation:
 
 ```bash
@@ -115,4 +57,4 @@ npm test
 npm run build
 ```
 
-See `docs/W0_WEB_FOUNDATION.md` for the detailed W0 contract.
+GitHub Actions performs the same validation on every push and pull request.
