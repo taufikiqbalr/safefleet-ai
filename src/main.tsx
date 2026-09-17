@@ -9,6 +9,7 @@ import './styles.css';
 import './auth.css';
 import './dashboard.css';
 import './alerts.css';
+import './safety-analytics.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
